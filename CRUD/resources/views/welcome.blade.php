@@ -238,37 +238,32 @@
  <script>
     // Función para eliminar empresa
     window.deleteSelectedEnterprises = function() {
-    var checkboxes = $('table tbody input[type="checkbox"]');
-    var selectedIds = [];
+        var checkboxes = $('table tbody input[type="checkbox"]');
+        var selectedIds = [];
 
-    checkboxes.each(function(index, checkbox) {
-        if ($(checkbox).is(':checked')) {
-            selectedIds.push($(checkbox).val());
-        }
-    });
-
-    console.log('IDs seleccionados:', selectedIds); // Verifica los IDs seleccionados
-
-    // Eliminar las empresas seleccionadas mediante una solicitud AJAX
-    selectedIds.forEach(function(id) {
-        $.ajax({
-            url: 'http://localhost:8000/api/enterprises/delete/' + id,
-            type: 'DELETE',
-            success: function(response) {
-                console.log('Empresa eliminada con éxito:', id);
-                // Eliminar la fila correspondiente a la casilla de verificación seleccionada
-                $('table tbody input[value="' + id + '"]').closest('tr').remove();
-            },
-            error: function(xhr, status, error) {
-                console.error('Error al eliminar la empresa:', error);
-                // Aquí puedes manejar el error, como mostrar un mensaje al usuario
+        checkboxes.each(function(index, checkbox) {
+            if ($(checkbox).is(':checked')) {
+                selectedIds.push($(checkbox).val()); // Aquí se obtiene el _id y se añade al array
             }
         });
-    });
 
-    // Cerrar el modal
-    $('#deleteEnterpriseModal').modal('hide');
-}
+        selectedIds.forEach(function(_id) {
+            $.ajax({
+                url: 'http://localhost:8000/api/enterprises/delete/' + _id, // Utiliza _id en lugar de id
+                type: 'DELETE',
+                success: function(response) {
+                    console.log('Empresa eliminada con éxito:', _id);
+                    $('table tbody input[value="' + _id + '"]').closest('tr').remove();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al eliminar la empresa:', error);
+                }
+            });
+        });
+
+        $('#deleteEnterpriseModal').modal('hide');
+    }
+
 
     $(document).ready(function(){
         // Cargar lista de empresas desde la API
@@ -283,17 +278,18 @@
                         var row = '<tr>' +
                                       '<td>' +
                                           '<span class="custom-checkbox">' +
-                                              '<input type="checkbox" id="checkbox'+index+'" name="options[]" value="'+enterprise.id+'">' +
+                                              '<input type="checkbox" id="checkbox'+index+'" name="options[]" value="'+enterprise._id+'">' +
                                               '<label for="checkbox'+index+'"></label>' +
                                           '</span>' +
                                       '</td>' +
+                                      '<td>'+enterprise._id+'</td>' + // Mostrar el _id
                                       '<td>'+enterprise.nombre_empresa+'</td>' +
                                       '<td>'+enterprise.correo_electronico+'</td>' +
                                       '<td>'+enterprise.ubicacion+'</td>' +
                                       '<td>'+enterprise.telefono+'</td>' +
                                       '<td>' +
-                                          '<a href="#editEnterpriseModal" class="edit" data-toggle="modal" onclick="editEnterprise('+enterprise.id+')"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>' +
-                                          '<a href="#deleteEnterpriseModal" class="delete" data-toggle="modal" onclick="deleteEnterprise('+enterprise.id+')"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>' +
+                                          '<a href="#editEnterpriseModal" class="edit" data-toggle="modal" onclick="editEnterprise('+enterprise._id+')"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>' +
+                                          '<a href="#deleteEnterpriseModal" class="delete" data-toggle="modal" onclick="deleteEnterprise('+enterprise._id+')"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>' +
                                       '</td>' +
                                   '</tr>';
                         tbody.append(row);
@@ -333,56 +329,44 @@
 
 
         // Función para editar empresa
-        window.editEnterprise = function(id) {
-        $.ajax({
-            url: 'http://localhost:8000/api/enterprises/' + id,
-            type: 'GET',
-            success: function(response) {
-                // Aquí puedes cargar los datos en el formulario de edición
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching enterprise data for edit:', error);
-            }
-        });
-    }
-
-    // Actualizar empresa
-    $('#editEnterpriseForm').submit(function(event) {
-        event.preventDefault();
-        var id = $('#editEnterpriseModal input[name="id"]').val();
-        $.ajax({
-            url: 'http://localhost:8000/api/enterprises/' + id,
-            type: 'PUT',
-            data: $(this).serialize(),
-            success: function(response) {
-                $('#editEnterpriseModal').modal('hide');
-                loadEnterprises();
-            },
-            error: function(xhr, status, error) {
-                console.error('Error updating enterprise:', error);
-            }
-        });
-    });
-
-    // Select/Deselect checkboxes
-    var checkbox = $('table tbody input[type="checkbox"]');
-    $("#selectAll").click(function(){
-        if(this.checked){
-            checkbox.each(function(){
-                this.checked = true;                        
+        window.editEnterprise = function(_id) {
+            $.ajax({
+                url: 'http://localhost:8000/api/enterprises/' + _id,
+                type: 'GET',
+                success: function(response) {
+                    // Aquí puedes cargar los datos en el formulario de edición
+                    $('#editEnterpriseForm input[name="id"]').val(response._id);
+                    $('#editEnterpriseForm input[name="nombre_empresa"]').val(response.nombre_empresa);
+                    $('#editEnterpriseForm input[name="descripcion"]').val(response.descripcion);
+                    $('#editEnterpriseForm input[name="ubicacion"]').val(response.ubicacion);
+                    $('#editEnterpriseForm input[name="telefono"]').val(response.telefono);
+                    $('#editEnterpriseForm input[name="correo_electronico"]').val(response.correo_electronico);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching enterprise data for edit:', error);
+                }
             });
-        } else{
-            checkbox.each(function(){
-                this.checked = false;                        
-            });
-        } 
-    });
-    checkbox.click(function(){
-        if(!this.checked){
-            $("#selectAll").prop("checked", false);
         }
+
+        // Select/Deselect checkboxes
+        var checkbox = $('table tbody input[type="checkbox"]');
+        $("#selectAll").click(function(){
+            if(this.checked){
+                checkbox.each(function(){
+                    this.checked = true;                        
+                });
+            } else{
+                checkbox.each(function(){
+                    this.checked = false;                        
+                });
+            } 
+        });
+        checkbox.click(function(){
+            if(!this.checked){
+                $("#selectAll").prop("checked", false);
+            }
+        });
     });
-});
 </script>
 
 
@@ -411,6 +395,7 @@
                                         <label for="selectAll"></label>
                                     </span>
                                 </th>
+                                <th>ID</th> <!-- Nueva columna para mostrar el ID -->
                                 <th>Nombre de la Empresa</th>
                                 <th>Correo Electrónico</th>
                                 <th>Ubicación</th>
@@ -473,52 +458,6 @@
         </div>
     </div>
 </div>
-
-
-        
-       <!-- Edit Enterprise Modal HTML -->
-<div id="editEnterpriseModal" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editEnterpriseForm">
-                <div class="modal-header">						
-                    <h4 class="modal-title">Editar Empresa</h4> <!-- Cambio de "Edit Enterprise" a "Editar Empresa" -->
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-                <div class="modal-body">					
-                    <div class="form-group">
-                        <label>Nombre de la Empresa</label>
-                        <input type="text" class="form-control" name="nombre_empresa" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <input type="text" class="form-control" name="descripcion" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Ubicación</label>
-                        <input type="text" class="form-control" name="ubicacion" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono</label>
-                        <input type="text" class="form-control" name="telefono" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Correo Electrónico</label>
-                        <input type="email" class="form-control" name="correo_electronico" required>
-                    </div>
-                    <!-- Campo oculto para almacenar el ID de la empresa -->
-                    <input type="hidden" name="id">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> <!-- Cambio de "Cancel" a "Cancelar" -->
-                    <button type="submit" class="btn btn-info">Guardar</button> <!-- Cambio de "Save" a "Guardar" -->
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-        
         <!-- Delete Enterprise Modal HTML -->
         <div id="deleteEnterpriseModal" class="modal fade">
             <div class="modal-dialog">
@@ -541,7 +480,5 @@
                 </div>
             </div>
         </div>
-        
-
         </body>
         </html>

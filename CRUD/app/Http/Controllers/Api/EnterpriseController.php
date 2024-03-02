@@ -78,11 +78,11 @@ class EnterpriseController extends Controller
     public function delete($id)
     {
         $enterprise = enterprises::where('_id', $id)->first();
-
+    
         if (!$enterprise) {
             return response()->json(['response' => 'Error: Empresa no encontrada'], 404);
         }
-
+    
         if ($enterprise->delete()) {
             return response()->json(['response' => 'Empresa eliminada correctamente']);
         } else {

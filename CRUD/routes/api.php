@@ -14,4 +14,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/enterprises', [EnterpriseController::class, 'list']);
 Route::post('/enterprises/create', [EnterpriseController::class, 'store']);
 Route::put('/enterprises/update/{id}', [EnterpriseController::class, 'update']);
-Route::delete('/enterprises/delete/{id}', [EnterpriseController::class, 'delete']);
+Route::delete('/enterprises/delete/{_id}', [EnterpriseController::class, 'delete']);
