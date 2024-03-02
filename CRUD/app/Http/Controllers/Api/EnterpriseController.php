@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\enterprises;
+
+class EnterpriseController extends Controller
+{
+    // Listar todas las empresas
+    public function list()
+    {
+        $enterprises = enterprises::all();
+        return response()->json($enterprises);
+    }
+
+    // Mostrar formulario para crear una nueva empresa
+    public function create()
+    {
+        return view('enterprises.create');
+    }
+
+    // Guardar una nueva empresa en la base de datos
+    public function store(Request $request)
+    {
+        // Valida los datos del formulario aquí si es necesario
+
+        $enterprise = new enterprises();
+        $enterprise->nombre_empresa = $request->input('nombre_empresa');
+        $enterprise->descripcion = $request->input('descripcion');
+        $enterprise->ubicacion = $request->input('ubicacion');
+        $enterprise->telefono = $request->input('telefono');
+        $enterprise->correo_electronico = $request->input('correo_electronico');
+        $enterprise->save();
+
+        return response()->json($enterprise, 201);
+    }
+
+    // Mostrar formulario para editar una empresa existente
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'nombre_empresa' => 'required|min:3',
+            'descripcion' => 'required|min:3',
+            'ubicacion' => 'required|min:3',
+            'telefono' => 'required|min:3',
+            'correo_electronico' => 'required|min:3',
+        ]);
+        
+        $enterprise = enterprises::where('_id', $id)->first();
+
+        if (!$enterprise) {
+            return response()->json(['response' => 'Error: Empresa no encontrada'], 404);
+        }
+
+        $enterprise->nombre_empresa = $data['nombre_empresa'];
+        $enterprise->descripcion = $data['descripcion'];
+        $enterprise->ubicacion = $data['ubicacion'];
+        $enterprise->telefono = $data['telefono'];
+        $enterprise->correo_electronico = $data['correo_electronico'];
+
+        if ($enterprise->save()) {
+            $object = [
+                "response" => 'Success. Empresa actualizada correctamente.',
+                "data" => $enterprise,
+            ];
+            return response()->json($object);
+        } else {
+            $object = [
+                "response" => 'Error: Algo salió mal, por favor inténtalo de nuevo.',
+            ];
+            return response()->json($object, 500);
+        }
+    }
+
+    // Eliminar una empresa de la base de datos
+    public function delete($id)
+    {
+        $enterprise = enterprises::where('_id', $id)->first();
+
+        if (!$enterprise) {
+            return response()->json(['response' => 'Error: Empresa no encontrada'], 404);
+        }
+
+        if ($enterprise->delete()) {
+            return response()->json(['response' => 'Empresa eliminada correctamente']);
+        } else {
+            return response()->json(['response' => 'Error al eliminar la empresa'], 500);
+        }
+    }
+}
