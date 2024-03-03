@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\enterprises;
+use Illuminate\Support\Facades\Http;
 
 class EnterpriseController extends Controller
 {
@@ -75,18 +76,15 @@ class EnterpriseController extends Controller
     }
 
     // Eliminar una empresa de la base de datos
-    public function delete($id)
-    {
-        $enterprise = enterprises::where('_id', $id)->first();
-    
-        if (!$enterprise) {
+    public function delete($_id){
+        $enterprise = enterprises::find($_id);
+        
+        if(!$enterprise) {
             return response()->json(['response' => 'Error: Empresa no encontrada'], 404);
         }
+        
+        $enterprise->delete();
     
-        if ($enterprise->delete()) {
-            return response()->json(['response' => 'Empresa eliminada correctamente']);
-        } else {
-            return response()->json(['response' => 'Error al eliminar la empresa'], 500);
-        }
+        return response()->json(['response' => 'Empresa eliminada correctamente']);
     }
 }
