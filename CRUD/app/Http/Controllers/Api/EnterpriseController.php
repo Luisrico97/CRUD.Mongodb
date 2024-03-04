@@ -39,41 +39,58 @@ class EnterpriseController extends Controller
     }
 
     // Mostrar formulario para editar una empresa existente
-    public function update(Request $request, $id)
-    {
-        $data = $request->validate([
-            'nombre_empresa' => 'required|min:3',
-            'descripcion' => 'required|min:3',
-            'ubicacion' => 'required|min:3',
-            'telefono' => 'required|min:3',
-            'correo_electronico' => 'required|min:3',
-        ]);
-        
-        $enterprise = enterprises::where('_id', $id)->first();
+   // Mostrar formulario para editar una empresa existente
+// Mostrar formulario para editar una empresa existente
+public function update(Request $request, $id)
+{
+    // Valida los datos del formulario aquí si es necesario
+    $data = $request->validate([
+        'nombre_empresa' => 'required|min:3',
+        'descripcion' => 'required|min:3',
+        'ubicacion' => 'required|min:3',
+        'telefono' => 'required|min:3',
+        'correo_electronico' => 'required|min:3',
+    ]);
 
-        if (!$enterprise) {
-            return response()->json(['response' => 'Error: Empresa no encontrada'], 404);
-        }
+    // Busca el modelo por el ID
+    $enterprise = enterprises::find($id);
 
-        $enterprise->nombre_empresa = $data['nombre_empresa'];
-        $enterprise->descripcion = $data['descripcion'];
-        $enterprise->ubicacion = $data['ubicacion'];
-        $enterprise->telefono = $data['telefono'];
-        $enterprise->correo_electronico = $data['correo_electronico'];
-
-        if ($enterprise->save()) {
-            $object = [
-                "response" => 'Success. Empresa actualizada correctamente.',
-                "data" => $enterprise,
-            ];
-            return response()->json($object);
-        } else {
-            $object = [
-                "response" => 'Error: Algo salió mal, por favor inténtalo de nuevo.',
-            ];
-            return response()->json($object, 500);
-        }
+    if (!$enterprise) {
+        return response()->json(['response' => 'Error: Empresa no encontrada'], 404);
     }
+
+    // Actualiza los datos del modelo
+    $enterprise->nombre_empresa = $data['nombre_empresa'];
+    $enterprise->descripcion = $data['descripcion'];
+    $enterprise->ubicacion = $data['ubicacion'];
+    $enterprise->telefono = $data['telefono'];
+    $enterprise->correo_electronico = $data['correo_electronico'];
+
+    if ($enterprise->save()) {
+        $object = [
+            "response" => 'Success. Empresa actualizada correctamente.',
+            "data" => $enterprise,
+        ];
+        return response()->json($object);
+    } else {
+        $object = [
+            "response" => 'Error: Algo salió mal, por favor inténtalo de nuevo.',
+        ];
+        return response()->json($object, 500);
+    }
+}
+
+
+public function show($_id)
+{
+    $enterprise = enterprises::find($_id);
+
+    if (!$enterprise) {
+        return response()->json(['error' => 'Empresa no encontrada'], 404);
+    }
+
+    return response()->json($enterprise);
+}
 
     // Eliminar una empresa de la base de datos
     public function delete($_id){

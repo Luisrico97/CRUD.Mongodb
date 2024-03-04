@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bootstrap CRUD Data Table for Database with Modal Form</title>
+<title>Rico Jimenez - Empresas de diseño - PHP & MongoDB - CRUD</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -234,6 +234,20 @@
     .modal form label {
         font-weight: normal;
     }   
+    .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #4b4d4e;
+            padding: 20px 0;
+            text-align: center;
+            color: white;
+        }
+    .navbar {
+        background-color: #4b4d4e;
+        color: white;
+    }
+    
 </style>
 <script>
     // Función para manejar la acción de editar empresa
@@ -284,30 +298,31 @@
 
 
     // Función para manejar la acción de guardar empresa editada
-    function guardarEmpresa(id) {
-        // Obtener los datos editados de la fila
-        var datos = {};
-        var fila = $("#fila_" + id);
-        fila.find(".editable input").each(function() {
-            var campo = $(this).parent().attr("data-campo");
-            var valor = $(this).val();
-            datos[campo] = valor;
-        });
+function guardarEmpresa(id) {
+    // Obtener los datos editados de la fila
+    var datos = {};
+    var fila = $("#fila_" + id);
+    fila.find(".editable input").each(function() {
+        var campo = $(this).parent().attr("data-campo");
+        var valor = $(this).val();
+        datos[campo] = valor;
+    });
 
-        // Realizar una solicitud AJAX para actualizar los datos de la empresa
-        $.ajax({
-            url: 'http://localhost:8000/api/enterprises/update/' + id,
-            type: 'PUT',
-            data: datos,
-            success: function(response) {
-                // Recargar los datos actualizados de la empresa
-                cargarEmpresa(id);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error al actualizar la empresa:', error);
-            }
-        });
-    }
+    // Realizar una solicitud AJAX para actualizar los datos de la empresa
+    $.ajax({
+        url: '/api/enterprises/update/' + id,
+        type: 'POST',
+        data: datos, // Aquí se utiliza la variable 'datos' en lugar de 'data'
+        success: function(response) {
+            // Recargar los datos actualizados de la empresa
+            cargarEmpresa(id);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al actualizar la empresa:', error);
+        }
+    });
+}
+
 
     // Función para manejar la acción de eliminar empresa
     function eliminarEmpresa(id) {
@@ -378,6 +393,7 @@
                         '</td>' +
                         '<td>' + empresa._id + '</td>' +
                         '<td class="editable" data-campo="nombre_empresa">' + empresa.nombre_empresa + '</td>' +
+                        '<td class="editable" data-campo="descripcion">' + empresa.descripcion + '</td>' +
                         '<td class="editable" data-campo="correo_electronico">' + empresa.correo_electronico + '</td>' +
                         '<td class="editable" data-campo="ubicacion">' + empresa.ubicacion + '</td>' +
                         '<td class="editable" data-campo="telefono">' + empresa.telefono + '</td>' +
@@ -448,6 +464,11 @@
 
 </head>
 <body>
+    <nav class="navbar">
+        <span class="navbar-text">
+            Rico Jimenez - Empresas de diseño - PHP & MongoDB - CRUD
+        </span>
+      </nav>
     <div class="container">
         <div class="table-responsive">
             <div class="table-wrapper">
@@ -466,13 +487,10 @@
                     <thead>
                         <tr>
                             <th>
-                                <span class="custom-checkbox">
-                                    <input type="checkbox" id="selectAll">
-                                    <label for="selectAll"></label>
-                                </span>
+                            
                             </th>
-                            <th>ID</th>
                             <th>Nombre de la Empresa</th>
+                            <th>Descripción</th> <!-- Nueva columna para la descripción -->
                             <th>Correo Electrónico</th>
                             <th>Ubicación</th>
                             <th>Teléfono</th>
@@ -484,23 +502,18 @@
                         <tr id="fila_1">
                             <td>1</td>
                             <td class="editable" data-campo="nombre_empresa">Empresa 1</td>
+                            <td class="editable" data-campo="descripcion">Descripción 1</td> <!-- Mostrar la descripción -->
                             <td class="editable" data-campo="correo_electronico">empresa1@example.com</td>
                             <td class="editable" data-campo="ubicacion">Ubicación 1</td>
                             <td class="editable" data-campo="telefono">123456789</td>
                             <td>
                                 <button class="btn btn-primary editar-empresa" onclick="editarEmpresa(1)"><i class="material-icons">&#xE254;</i></button>
                                 <button id="guardarEmpresaBtn_1" class="btn btn-success guardar-empresa" onclick="guardarEmpresa(1)" style="display: none;"><i class="material-icons">&#xE161;</i></button>
-<button id="cancelarEdicionBtn_1" class="btn btn-danger cancelar-edicion" onclick="cancelarEdicion(1)" style="display: none;"><i class="material-icons">&#xE14C;</i></button>
+                                <button id="cancelarEdicionBtn_1" class="btn btn-danger cancelar-edicion" onclick="cancelarEdicion(1)" style="display: none;"><i class="material-icons">&#xE14C;</i></button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="clearfix">
-                    <div class="hint-text">Showing <b>1</b> out of <b>25</b> entries</div>
-                    <ul class="pagination">
-                        <!-- Paginación -->
-                    </ul>
-                </div>
             </div>
         </div>        
     </div>
@@ -560,7 +573,7 @@
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
                     <!-- Modifica el botón para pasar el _id como parámetro -->
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteenterprises()">Delete</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteEnterprises()">Delete</button>
                 </div>
             </form>
         </div>
@@ -568,4 +581,17 @@
     </div>
     </div>
     </body>
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>Asignatura: BASE DE DATOS PARA CÓMPUTO EN LA NUBE</p>
+                    <p>Alumno: Luis Alberto Rico Jimenez</p>
+                </div>
+                <div class="col-md-6 text-right">
+                    <img src="{{ asset('assets/logo.png') }}" alt="Logotipo del Alumno" width="180" style="border-radius: 15px;">
+                </div>
+            </div>
+        </div>
+    </footer>
     </html>

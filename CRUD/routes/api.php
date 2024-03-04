@@ -13,5 +13,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Rutas para listar, crear, actualizar y eliminar empresas
 Route::get('/enterprises', [EnterpriseController::class, 'list']);
 Route::post('/enterprises/create', [EnterpriseController::class, 'store']);
-Route::put('/enterprises/update/{_id}', [EnterpriseController::class, 'update']);
+Route::post('/enterprises/update/{id}', [EnterpriseController::class, 'update']);
 Route::delete('/enterprises/{id}', [EnterpriseController::class, 'delete']);
+Route::get('/enterprises/details/{id}', [EnterpriseController::class, 'show']);
